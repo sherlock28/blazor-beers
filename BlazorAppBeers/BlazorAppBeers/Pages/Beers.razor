@@ -1,0 +1,46 @@
+﻿@page "/beers"
+
+@using BlazorAppBeers.Data
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<h3>Beers</h3>
+
+<div class="row">
+    <div class="col-12 text-right">
+        <a href="/beer">New</a>
+    </div>
+</div>
+
+<table class="table">
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Brand</th>
+        <th></th>
+    </tr>
+    @if (oRes != null && oRes.Data != null)
+    {
+        @foreach (var item in oRes.Data)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>@item.Brand</td>
+                <td>
+                    <a href="/beer/@item.Id">Edit</a>
+                    <a href="/remove-beer/@item.Id">Remove</a>
+                </td>
+            </tr>
+        }
+    }
+</table>
+
+@code {
+    private String Resource = "/api/beers";
+    public ServiceResponse<List<Beer>> oRes = new ServiceResponse<List<Beer>>();
+
+    protected override async Task OnInitializedAsync() =>
+        oRes = await Http.GetFromJsonAsync<ServiceResponse<List<Beer>>>(Resource);
+}

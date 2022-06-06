@@ -1,0 +1,70 @@
+﻿@page "/beer"
+@page "/beer/{Id:int}"
+
+@using Data
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Beer Form</h3>
+
+<EditForm Model="@oBeer">
+    <div class="container-fluid">
+
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Name</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@oBeer.Name"></InputText>
+            </div>
+        </div>
+
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Brand</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@oBeer.Brand"></InputText>
+            </div>
+        </div>
+
+        <div class="form-group row mb-1">
+            <div class="col-sm-12">
+                <button class="btn btn-primary" @onclick="Save">Save</button>
+            </div>
+        </div>
+
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    Beer oBeer = new Beer();
+    ServiceResponse<Beer> oRes = new ServiceResponse<Beer>();
+    private String Resource = "/api/beers";
+
+
+    private async Task Save()
+    {
+        if (Id != 0)
+        {
+            var response = await Http.PutAsJsonAsync<Beer>(Resource, oBeer);
+            //oRes = response.Content.ReadFromJsonAsync<ServiceResponse<List<Beer>>>().Result;
+            NavigationManager.NavigateTo("/beers");
+        }
+        else
+        {
+            var response = await Http.PostAsJsonAsync<Beer>(Resource, oBeer);
+            //oRes = response.Content.ReadFromJsonAsync<ServiceResponse<List<Beer>>>().Result;
+            NavigationManager.NavigateTo("/beers");
+        }
+    }
+
+    protected override async Task OnInitializedAsync() {
+        if (Id != 0)
+        {
+            oRes = await Http.GetFromJsonAsync<ServiceResponse<Beer>>(Resource + "/" + Id);
+            oBeer = oRes.Data;
+        }
+    }
+}
